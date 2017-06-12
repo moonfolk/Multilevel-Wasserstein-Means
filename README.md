@@ -58,20 +58,20 @@ data: list of length M (number of groups) of d x Nm arrays (d - dimensionality; 
 truth: can be used by score function later
 
 Returns:
-H_: list of atoms of global barycenters
-a_: list of weights of atoms of global barycenters
-Y_: list of atoms of local barycenters (equal to len(Z)*[S] for LC method)
-b_: lsit of weights of atoms of local barycneters
-S_: array of atoms in the constraint set (only if method = 'LC')
-labels_: list of label assignments of groups to global clusters
+H_: list of atoms of global barycenters  
+a_: list of weights of atoms of global barycenters  
+Y_: list of atoms of local barycenters (equal to len(Z)*[S] for LC method)  
+b_: lsit of weights of atoms of local barycneters  
+S_: array of atoms in the constraint set (only if method = 'LC')  
+labels_: list of label assignments of groups to global clusters  
 
 ```
 score(truth=None)
 ```
 
-Note: can only be used on fitted object
-Unless truth provided before, provide either true label assignments or true model parameters (later is used for simulations)
+Note: can only be used on fitted object.  
+Unless truth provided before, provide either true label assignments or true model parameters (later is used for simulations).  
 
 Returns:
-Wasserstein distance to truth if true model parameters are given;
+Wasserstein distance to truth if true model parameters are given;  
 AMI score if true label assignemtns are given
