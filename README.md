@@ -20,7 +20,7 @@ simul_example.py has some simulated examples
 
 Implementation is designed to be used in the interactive mode (e.g. Python IDE like Spyder).
 
-## Usage guide1
+## Usage guide
 
 ```
 W_means(K=5, K_a=6, k=4, n_iter=10, weight=True, verbose=0, init = 'kmeans', k_init=5, method = 'NC', n_iter_cuturi = [5, 10, 50])
