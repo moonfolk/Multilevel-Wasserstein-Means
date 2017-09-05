@@ -18,7 +18,7 @@ W_means_class.py implements our clustering algoritms as a scikit-learn estimator
 
 simul_example.py has some simulated examples
 
-Implementation is designed to be used in interative mode (e.g. Python IDE like Spyder).
+Implementation is designed to be used in the interactive mode (e.g. Python IDE like Spyder).
 
 ## Usage guide
 
@@ -46,7 +46,7 @@ k_init: used for 'kmeans' initialization of 'LC' method; Recomended - value of k
 
 method: 'NC' for no constraint; 'LC' for local constraint; '3means' for 3 stage kmeans
 
-n_iter_cuturi: Number of iterations to run for Cuturi [algo2; algo1; algo3].
+n_iter_cuturi: Number of iterations to run for Cuturi [algo2; algo1; algo3]
 
 
 Methods:
@@ -70,8 +70,8 @@ score(truth=None)
 ```
 
 Note: can only be used on fitted object.  
-Unless truth provided before, provide either true label assignments or true model parameters (later is used for simulations).  
+Unless truth provided before, provide either true label assignments or true model parameters (later is used for simulations).
 
 Returns:
-Wasserstein distance to truth if true model parameters are given;  
+Wasserstein distance to truth if true model parameters are given
 AMI score if true label assignemtns are given
