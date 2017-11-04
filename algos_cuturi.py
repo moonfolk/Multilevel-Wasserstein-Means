@@ -25,7 +25,7 @@ def algo1(X, Y, b, M, weight=None, a_til=None, verbose=0, max_iter=[10,50]):
         a = (1-1/beta)*a_hat + a_til/beta
         algo_out = [algo3(a, b[i], M[i], param='alpha', verbose=verbose, max_iter=max_iter[1]) for i in range(N)]
         alpha = [weight[i]*algo_out[i][0] for i in range(N)]        
-        alpha = -np.sum(alpha, axis=0)
+        alpha = np.sum(alpha, axis=0)
         a_til_n = a_til * np.exp(-t_0*beta*alpha)
         
         # Solving potential numeric issues

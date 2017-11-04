@@ -89,6 +89,6 @@ def algo3(np.ndarray[Df_t, ndim=1] a, np.ndarray[Df_t, ndim=1] b, np.ndarray[Df_
                 tmp += u[j]
         tmp /= n*l
         for j in range(n):
-            alpha[j] = -u[j]/l + tmp
+            alpha[j] = u[j]/l - tmp
         return alpha, obj
         
