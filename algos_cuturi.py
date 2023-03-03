@@ -39,7 +39,7 @@ def algo1(X, Y, b, M, weight=None, a_til=None, verbose=0, max_iter=[10,50]):
             
         a_hat = (1-1/beta)*a_hat + a_til/beta
         if np.any(np.isnan(a_hat)):
-            print 'Something is wrong in Algo1 Cuturi'
+            print('Something is wrong in Algo1 Cuturi') 
         t += 1
     obj = 0
     if verbose:
@@ -73,7 +73,7 @@ def algo2(Y, b, n, weight=None, X=None, a=None, verbose=0, max_iter=[5, 10, 50])
         X = (1-teta)*X + teta*t
         c+=1
         if np.any(np.isnan(X)):
-            print 'Something is wrong in Algo2 Cuturi'
+            print('Something is wrong in Algo2 Cuturi') 
     obj = 0
     if verbose:
         obj = np.sum([algo_out[i][1] for i in range(N)])

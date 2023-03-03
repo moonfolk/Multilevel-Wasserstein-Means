@@ -75,12 +75,12 @@ def init_nc(Z, K, K_a, k, n_iter=300, verbose=1):
         K_a = np.repeat(K_a, K)
     
     ## Initialize with k-means++
-    time_s = time.clock()
-    kmeans = [KMeans(n_clusters=k[m], max_iter=n_iter).fit(Z[m].T) for m in range(M)]
+    time_s = time.time()
+    kmeans = [KMeans(n_clusters=k[m], max_iter=n_iter, n_init='auto').fit(Z[m].T) for m in range(M)]
     Y = [kmeans[m].cluster_centers_.T for m in range(M)]
     b = [np.unique(kmeans[m].labels_, return_counts=True)[1]*1./N[m] for m in range(M)]
     Y_flat = np.concatenate(Y, axis=1)
-    kmeans = KMeans(n_clusters=K, max_iter=n_iter).fit(Y_flat.T)
+    kmeans = KMeans(n_clusters=K, max_iter=n_iter, n_init='auto').fit(Y_flat.T)
     counts = np.unique(kmeans.labels_, return_counts=True)[1]
     H = []
     a = []
@@ -93,11 +93,11 @@ def init_nc(Z, K, K_a, k, n_iter=300, verbose=1):
             H.append(Y_flat[:,kmeans.labels_==l])
             a.append(np.repeat(1./K_a[l], K_a[l]))
         else:
-            k_means_init = KMeans(n_clusters=K_a[l], max_iter=n_iter).fit(Y_flat[:,kmeans.labels_==l].T)
+            k_means_init = KMeans(n_clusters=K_a[l], max_iter=n_iter, n_init='auto').fit(Y_flat[:,kmeans.labels_==l].T)
             H.append(k_means_init.cluster_centers_.T)
             a.append(np.unique(k_means_init.labels_, return_counts=True)[1]*1./sum(kmeans.labels_==l))
     if verbose:
-        print '3means initialization took %f' % (time.clock()-time_s)
+        print('3means initialization took %f' % (time.time()-time_s)) 
     return Y, b, H, a
 
 ## Algorithm 1    
@@ -116,7 +116,7 @@ def learn_nc(Z, K, K_a, k, n_iter=20, weight=True, verbose=0, init = 'kmeans', n
     ## Improved initialization
     if init == 'kmeans':
         Y, b, H, a = init_nc(Z, K, K_a, k, verbose=verbose)
-        print 'Done initializing with k-means'
+        print('Done initializing with k-means') 
     else:
         Y = [np.random.normal(size=(d,k[m])) for m in range(M)]
         b = [np.random.dirichlet(np.ones(k[m])) for m in range(M)]
@@ -137,38 +137,38 @@ def learn_nc(Z, K, K_a, k, n_iter=20, weight=True, verbose=0, init = 'kmeans', n
     for it in range(n_iter):
         
         # Assign labels to each Gm
-        time_s = time.clock()
+        time_s = time.time()
         labels, obj = zip(*[get_labels(Y[m], b[m], H, a, max_iter=n_iter_cuturi[2]) for m in range(M)])
-        time_e = time.clock()
+        time_e = time.time()
         time_l += time_e - time_s
         if verbose:
             obj = np.sum(obj)
-            print 'Sum of Gm to H objectives at iteration %d is %f' % (it, obj)
+            print('Sum of Gm to H objectives at iteration %d is %f' % (it, obj)) 
         
         # Update atoms and weights of each local barycenter (Gm)
-        time_s = time.clock()
+        time_s = time.time()
         Y, b, obj = zip(*[y_update(Z[m], W[m], H[labels[m]], a[labels[m]], k[m], M, bm=b[m], Ym=Y[m], weight = weight_b, verbose=verbose, max_iter=n_iter_cuturi) for m in range(M)])
-        time_e = time.clock()
+        time_e = time.time()
         time_g += time_e - time_s
         if verbose:
             obj = np.sum(obj)
-            print 'Total objective is %f' % obj
+            print('Total objective is %f' % obj) 
         
         # Recompute labels
-        time_s = time.clock()
+        time_s = time.time()
         labels, obj = zip(*[get_labels(Y[m], b[m], H, a, max_iter=n_iter_cuturi[2]) for m in range(M)])
-        time_e = time.clock()
+        time_e = time.time()
         time_l += time_e - time_s
         
         # Update global barycenters (both atoms and weights)
-        time_s = time.clock()
+        time_s = time.time()
         for i in np.unique(labels):
             H[i], a[i], obj_i = algo2([Y[m] for m in range(M) if labels[m]==i], [b[m] for m in range(M) if labels[m]==i], n=K_a[i], X = H[i], a = a[i], max_iter=n_iter_cuturi)
-        time_e = time.clock()
+        time_e = time.time()
         time_h += time_e - time_s
         
     if verbose:
-        print 'Updating labels took %f\nUpdating local barycenters took %f\nUpdating global barycenters took %f' % (time_l, time_g, time_h)
+        print('Updating labels took %f\nUpdating local barycenters took %f\nUpdating global barycenters took %f' % (time_l, time_g, time_h)) 
     return H, a, Y, b, labels # global atoms; global weights; local atoms; local weights; cluster assignments
 
 ## Local constraint algorithm
@@ -184,7 +184,7 @@ def init_lc(Z, K, K_a, k, k_init, verbose=1):
         K_a = np.repeat(K_a, K)
     
     ## Initialize S with k-means++
-    kmeans = KMeans(n_clusters=k).fit(Z_flat.T)
+    kmeans = KMeans(n_clusters=k, n_init='auto').fit(Z_flat.T)
     S = kmeans.cluster_centers_.T
     b = []
     cur_ind = 0
@@ -197,11 +197,11 @@ def init_lc(Z, K, K_a, k, k_init, verbose=1):
         b.append(b_0)
      
     ## Initialize H same as init_nc
-    time_s = time.clock()
-    kmeans = [KMeans(n_clusters=k_init).fit(Z[m].T) for m in range(M)]
+    time_s = time.time()
+    kmeans = [KMeans(n_clusters=k_init, n_init='auto').fit(Z[m].T) for m in range(M)]
     Y = [kmeans[m].cluster_centers_.T for m in range(M)]
     Y_flat = np.concatenate(Y, axis=1)
-    kmeans = KMeans(n_clusters=K).fit(Y_flat.T)
+    kmeans = KMeans(n_clusters=K, n_init='auto').fit(Y_flat.T)
     counts = np.unique(kmeans.labels_, return_counts=True)[1]
     H = []
     a = []
@@ -214,12 +214,12 @@ def init_lc(Z, K, K_a, k, k_init, verbose=1):
             H.append(Y_flat[:,kmeans.labels_==l])
             a.append(np.repeat(1./K_a[l], K_a[l]))
         else:
-            k_means_init = KMeans(n_clusters=K_a[l]).fit(Y_flat[:,kmeans.labels_==l].T)
+            k_means_init = KMeans(n_clusters=K_a[l], n_init='auto').fit(Y_flat[:,kmeans.labels_==l].T)
             H.append(k_means_init.cluster_centers_.T)
             a.append(np.unique(k_means_init.labels_, return_counts=True)[1]*1./sum(kmeans.labels_==l))
             
     if verbose:
-        print '3means initialization took %f' % (time.clock()-time_s)
+        print('3means initialization took %f' % (time.time()-time_s)) 
     return S, b, H, a
 
 ## Algorithm 2
@@ -258,33 +258,33 @@ def learn_lc(Z, K, K_a, k, n_iter=20, k_init = 5, weight = True, verbose=0, init
     for it in range(n_iter):
 
         # Assign labels to each Gm
-        time_s = time.clock()
+        time_s = time.time()
         labels, obj = zip(*[get_labels(S, b[m], H, a, max_iter=n_iter_cuturi[2]) for m in range(M)])
-        time_e = time.clock()
+        time_e = time.time()
         time_l += time_e - time_s
         if verbose:
             obj = np.sum(obj)
-            print 'Sum of Gm to H objectives at iteration %d is %f' % (it, obj)
+            print('Sum of Gm to H objectives at iteration %d is %f' % (it, obj)) 
         
         # Update set of atoms S and weights for each group's barycenter
-        time_s = time.clock()
+        time_s = time.time()
         update_atoms(S, b, H, a, Z, W, labels, weight=weight_a, max_iter=n_iter_cuturi[2])
         b, obj = zip(*[y_update_weight(Z[m], W[m], H[labels[m]], a[labels[m]], M, S, bm=b[m], weight=weight_b, verbose=verbose, max_iter=n_iter_cuturi[1:]) for m in range(M)])
-        time_e = time.clock()
+        time_e = time.time()
         time_g += time_e - time_s
         if verbose:
             obj = np.sum(obj)
-            print 'Total objective is %f' % obj
+            print('Total objective is %f' % obj) 
         
         # Update global barycenters (both atoms and weights)
-        time_s = time.clock()
+        time_s = time.time()
         for i in np.unique(labels):
             H[i], a[i], obj_i = algo2([S for m in range(M) if labels[m]==i], [b[m] for m in range(M) if labels[m]==i], n=K_a[i], X=H[i], a=a[i], max_iter=n_iter_cuturi)
-        time_e = time.clock()
+        time_e = time.time()
         time_h += time_e - time_s
     
     if verbose:
-        print 'Updating labels took %f\nUpdating local barycenters took %f\nUpdating global barycenters took %f' % (time_l, time_g, time_h)
+        print('Updating labels took %f\nUpdating local barycenters took %f\nUpdating global barycenters took %f' % (time_l, time_g, time_h)) 
     return H, a, S, b, labels 
 
 ####################### Data simulation functions
